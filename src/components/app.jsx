@@ -4,7 +4,9 @@ const initialData = {
   fullName: "Leonard Lim",
   email: "leonard.ljh@gmail.com",
   phone: "+65 9999 9999",
-  location: "Singapore"
+  location: "Singapore",
+  education: [],
+  work: []
 }
 
 function App() {
@@ -12,9 +14,27 @@ function App() {
   const [data, setData] = useState(initialData);
 
   const handleChange = (id, value) => {
-    console.log('ran');
     const newData = {...data, [id]: value};
     setData(newData);
+  }
+
+  const reset = (key) => {
+    let copy = {...data};
+    switch(key) {
+      case 0:
+        copy.fullName = '';
+        copy.email = '';
+        copy.phone = '';
+        copy.location = '';
+        break;
+      case 1:
+        copy.education = [];
+        break;
+      case 2:
+        copy.work = [];
+        break;
+    }
+    setData(copy);
   }
 
   const toggleActive = (key) => {
@@ -30,15 +50,15 @@ function App() {
 
   return (
     <>
-      <GeneralInfo {...data} key={0} isActive={activeList.includes(0)} handleClick={() => toggleActive(0)} handleChange={handleChange} />
-      {/* <Education key={1}/>
-      <Work key={2}/>
+      <GeneralInfo id={0} {...data} isActive={activeList.includes(0)} handleClick={() => toggleActive(0)} handleChange={handleChange} reset={reset}/>
+      {/* <Education id={1}/>
+      <Work id={2}/>
       <Display /> */}
     </>
   )
 }
 
-function GeneralInfo({ isActive, handleClick, fullName, email, phone, location, handleChange }) {
+function GeneralInfo({ id, isActive, handleClick, fullName, email, phone, location, handleChange, reset }) {
   return (
     <>
       <form className="generalInfo" onClick={handleClick}>General Information</form>
@@ -48,6 +68,7 @@ function GeneralInfo({ isActive, handleClick, fullName, email, phone, location, 
         <FormInput id={'email'} label={"Email"} type="email" text={email} handleChange={handleChange}/>
         <FormInput id={"phone"} label={"Phone number"} text={phone} handleChange={handleChange} />
         <FormInput id={"location"} label={"Location"} text={location} handleChange={handleChange} />
+        <button type="button" onClick={() => reset(id)}>Reset</button>
       </>
       }
     </>
