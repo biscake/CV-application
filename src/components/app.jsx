@@ -5,7 +5,14 @@ const initialData = {
   email: "leonard.ljh@gmail.com",
   phone: "+65 9999 9999",
   location: "Singapore",
-  education: [],
+  education: [
+    {
+      universityName: "NUS",
+      degree: "Major",
+      start: "2024",
+      end: "2028"
+    }
+  ],
   work: []
 }
 
@@ -38,12 +45,7 @@ function App() {
   }
 
   const toggleActive = (key) => {
-    let newActive;
-    if (!activeList.includes(key)) {
-      newActive = [...activeList, key];
-    } else {
-      newActive = activeList.filter(item => item !== key);
-    }
+    let newActive = !activeList.includes(key) ? [...activeList, key] : activeList.filter(item => item !== key);
     setActiveList(newActive);
   }
 
@@ -51,8 +53,8 @@ function App() {
   return (
     <>
       <GeneralInfo id={0} {...data} isActive={activeList.includes(0)} handleClick={() => toggleActive(0)} handleChange={handleChange} reset={reset}/>
-      {/* <Education id={1}/>
-      <Work id={2}/>
+      <Education id={1} isActive={activeList.includes(1)} handleClick={() => toggleActive(1)} reset={reset} educationData={data.education} />
+      {/* <Work id={2}/>
       <Display /> */}
     </>
   )
@@ -75,8 +77,25 @@ function GeneralInfo({ id, isActive, handleClick, fullName, email, phone, locati
   )
 }
 
-function Education() {
-
+function Education({id, isActive, handleClick, reset, educationData}) {
+  return (
+    <>
+      <div className="education" onClick={handleClick}>Education</div>
+      {isActive && 
+      <>
+        {educationData.length &&
+        <ul>
+          {educationData.map((entry) => {
+            return <EducationList entry={entry} />
+          })}
+        </ul>
+        }
+        <button type="button" onClick={() => reset(id)}>Reset</button>
+      </>
+      }
+      
+    </>
+  )
 }
 
 function Work() {
@@ -94,6 +113,16 @@ function FormInput({ label, id, type = 'text', text, handleChange }) {
       <label htmlFor={id}>{label}&nbsp;&nbsp;</label>
       <input id={id} type={type} onChange={(e) => handleChange(id, e.target.value)} value={text} />
     </>
+  )
+}
+
+function EducationList({entry}) {
+  return (
+    <li className="educationList">
+      {entry.universityName}
+      <button type="button">Edit</button>
+      <button type="button">Delete</button>
+    </li>
   )
 }
 
