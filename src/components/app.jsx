@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { v4 as uuidv4 } from 'uuid';
 
 const initialData = {
   fullName: "Leonard Lim",
@@ -10,7 +11,8 @@ const initialData = {
       universityName: "NUS",
       degree: "Major",
       start: "2024",
-      end: "2028"
+      end: "2028",
+      id: uuidv4()
     }
   ],
   work: []
@@ -19,6 +21,7 @@ const initialData = {
 function App() {
   const [activeList, setActiveList] = useState([]);
   const [data, setData] = useState(initialData);
+  const [isEditing, setIsEditing] = useState({isTrue: false, id: null});
 
   const handleChange = (id, value) => {
     const newData = {...data, [id]: value};
@@ -44,8 +47,18 @@ function App() {
     setData(copy);
   }
 
+  const handleEducationEdit = (id, value) => {
+    const educationList = data.education.map((entry) => {
+      if (entry.id === isEditing.id) {
+        entry[id] = value;
+      } 
+      return entry;
+    })
+    setData({...data, education: educationList});
+  }
+
   const toggleActive = (key) => {
-    let newActive = !activeList.includes(key) ? [...activeList, key] : activeList.filter(item => item !== key);
+    const newActive = !activeList.includes(key) ? [...activeList, key] : activeList.filter(item => item !== key);
     setActiveList(newActive);
   }
 
@@ -53,7 +66,7 @@ function App() {
   return (
     <>
       <GeneralInfo id={0} {...data} isActive={activeList.includes(0)} handleClick={() => toggleActive(0)} handleChange={handleChange} reset={reset}/>
-      <Education id={1} isActive={activeList.includes(1)} handleClick={() => toggleActive(1)} reset={reset} educationData={data.education} />
+      <Education isEditing={isEditing} toggleEdit={setIsEditing} id={1} isActive={activeList.includes(1)} handleClick={() => toggleActive(1)} reset={reset} educationData={data.education} handleEdit={handleEducationEdit} />
       {/* <Work id={2}/>
       <Display /> */}
     </>
@@ -77,19 +90,35 @@ function GeneralInfo({ id, isActive, handleClick, fullName, email, phone, locati
   )
 }
 
-function Education({id, isActive, handleClick, reset, educationData}) {
+function Education({id, isActive, handleClick, reset, educationData, handleEdit, isEditing, toggleEdit}) {
+  let currentEdit;
+  if (isEditing.isTrue) {
+    educationData.forEach(entry => {
+      if (entry.id === isEditing.id) {
+        currentEdit = entry;
+      }
+    });
+  }
   return (
     <>
       <div className="education" onClick={handleClick}>Education</div>
-      {isActive && 
+      {isActive && isEditing.isTrue && 
       <>
-        {educationData.length &&
+        <FormInput label="University" id={"universityName"} text={currentEdit.universityName} handleChange={handleEdit}/>
+        <FormInput label="Degree" id={"degree"} text={currentEdit.degree} handleChange={handleEdit}/>
+        <FormInput label="Start" id={"start"} text={currentEdit.start} handleChange={handleEdit}/>
+        <FormInput label="End" id={"end"} text={currentEdit.end} handleChange={handleEdit}/>
+        <button type="button" onClick={() => toggleEdit({isTrue: false, id: null})}>Done</button>
+      </>
+      }
+      {!isEditing.isTrue && isActive && 
+      <>
+        {educationData.length !== 0 &&
         <ul>
-          {educationData.map((entry) => {
-            return <EducationList entry={entry} />
-          })}
+          {educationData.map((entry) => <EducationList key={entry.id} id={entry.id} entry={entry} handleEdit={handleEdit} toggleEdit={toggleEdit}/>)}
         </ul>
         }
+        <button type="button">Add</button>
         <button type="button" onClick={() => reset(id)}>Reset</button>
       </>
       }
@@ -116,11 +145,11 @@ function FormInput({ label, id, type = 'text', text, handleChange }) {
   )
 }
 
-function EducationList({entry}) {
+function EducationList({entry, id, toggleEdit}) {
   return (
     <li className="educationList">
       {entry.universityName}
-      <button type="button">Edit</button>
+      <button type="button" onClick={() => toggleEdit({isTrue: true, id: id})}>Edit</button>
       <button type="button">Delete</button>
     </li>
   )
