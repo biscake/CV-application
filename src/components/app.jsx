@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { v4 as uuidv4 } from 'uuid';
+import '../styles/app.css';
 
 const initialData = {
   fullName: "Leonard Lim",
@@ -67,35 +68,42 @@ function App() {
     setActiveList(newActive);
   }
 
+  const deleteEducation = (key) => {
+    const newEducation = [...data.education].filter((entry) => entry.id !== key);
+    setData({...data, education: newEducation});
+  }
+
 
   return (
-    <>
+    <main>
       <GeneralInfo id={0} {...data} isActive={activeList.includes(0)} handleClick={() => toggleActive(0)} handleChange={handleChange} reset={reset}/>
-      <Education isEditing={isEditing} toggleEdit={setIsEditing} id={1} isActive={activeList.includes(1)} handleClick={() => toggleActive(1)} reset={reset} educationData={data.education} handleEdit={handleEducationEdit} handleAdd={addEducation} />
+      <Education isEditing={isEditing} toggleEdit={setIsEditing} id={1} isActive={activeList.includes(1)} handleClick={() => toggleActive(1)} reset={reset} educationData={data.education} handleEdit={handleEducationEdit} handleAdd={addEducation} handleDelete={deleteEducation} />
       {/* <Work id={2}/>
       <Display /> */}
-    </>
+    </main>
   )
 }
 
 function GeneralInfo({ id, isActive, handleClick, fullName, email, phone, location, handleChange, reset }) {
   return (
-    <>
-      <form className="generalInfo" onClick={handleClick}>General Information</form>
+    <div className="form-container generalInfo" >
+      <h2 onClick={handleClick}>General Information</h2>
       {isActive && 
       <>
         <FormInput id={"fullName"} label={"Full Name"} text={fullName} handleChange={handleChange} />
         <FormInput id={'email'} label={"Email"} type="email" text={email} handleChange={handleChange}/>
         <FormInput id={"phone"} label={"Phone number"} text={phone} handleChange={handleChange} />
         <FormInput id={"location"} label={"Location"} text={location} handleChange={handleChange} />
-        <button type="button" onClick={() => reset(id)}>Reset</button>
+        <div className="buttons">
+          <button type="button" onClick={() => reset(id)}>Reset</button>
+        </div>
       </>
       }
-    </>
+    </div>
   )
 }
 
-function Education({id, isActive, handleClick, reset, educationData, handleEdit, isEditing, toggleEdit, handleAdd}) {
+function Education({id, isActive, handleClick, reset, educationData, handleEdit, isEditing, toggleEdit, handleAdd, handleDelete}) {
   let currentEdit;
   const [add, setAdd] = useState({isAdd: false, universityName: "", degree: "", start: "", end: ""});
   const handleChange = (id, val) => {
@@ -116,15 +124,17 @@ function Education({id, isActive, handleClick, reset, educationData, handleEdit,
   }
 
   return (
-    <>
-      <div className="education" onClick={handleClick}>Education</div>
+    <div className="form-container education">
+      <h2 onClick={handleClick}>Education</h2>
       {isActive && isEditing.isTrue && 
       <>
         <FormInput label="University" id={"universityName"} text={currentEdit.universityName} handleChange={handleEdit}/>
         <FormInput label="Degree" id={"degree"} text={currentEdit.degree} handleChange={handleEdit}/>
         <FormInput label="Start" id={"start"} text={currentEdit.start} handleChange={handleEdit}/>
         <FormInput label="End" id={"end"} text={currentEdit.end} handleChange={handleEdit}/>
-        <button type="button" onClick={() => toggleEdit({isTrue: false, id: null})}>Done</button>
+        <div className="buttons">
+          <button type="button" onClick={() => toggleEdit({isTrue: false, id: null})}>Done</button>
+        </div>
       </>
       }
       {isActive && add.isAdd && 
@@ -133,22 +143,27 @@ function Education({id, isActive, handleClick, reset, educationData, handleEdit,
         <FormInput label="Degree" id={"degree"} text={add.degree} handleChange={handleChange}/>
         <FormInput label="Start" id={"start"} text={add.start} handleChange={handleChange}/>
         <FormInput label="End" id={"end"} text={add.end} handleChange={handleChange}/>
-        <button type="button" onClick={() => addEducation()}>Add!</button>
+        <div className="buttons">
+          <button type="button" onClick={() => addEducation()}>Add!</button>
+          <button type="button" onClick={() => setAdd({isAdd: false, universityName: "", degree: "", start: "", end: ""})}>Cancel</button>
+        </div>
       </>
       }
       {!isEditing.isTrue && isActive && !add.isAdd &&
       <>
         {educationData.length !== 0 &&
         <ul>
-          {educationData.map((entry) => <EducationList key={entry.id} id={entry.id} entry={entry} handleEdit={handleEdit} toggleEdit={toggleEdit}/>)}
+          {educationData.map((entry) => <EducationList key={entry.id} id={entry.id} entry={entry} handleEdit={handleEdit} toggleEdit={toggleEdit} handleDelete={handleDelete}/>)}
         </ul>
         }
-        <button type="button" onClick={() => setAdd({...add, isAdd: true})}>Add</button>
-        <button type="button" onClick={() => reset(id)}>Reset</button>
+        <div className="buttons">
+          <button type="button" onClick={() => setAdd({...add, isAdd: true})}>Add</button>
+          <button type="button" onClick={() => reset(id)}>Reset</button>
+        </div>
       </>
       }
       
-    </>
+    </div>
   )
 }
 
@@ -163,19 +178,19 @@ function Display() {
 
 function FormInput({ label, id, type = 'text', text, handleChange }) {
   return (
-    <>
+    <div className="input">
       <label htmlFor={id}>{label}&nbsp;&nbsp;</label>
       <input id={id} type={type} onChange={(e) => handleChange(id, e.target.value)} value={text} />
-    </>
+    </div>
   )
 }
 
-function EducationList({entry, id, toggleEdit}) {
+function EducationList({entry, id, toggleEdit, handleDelete}) {
   return (
     <li className="educationList" key={id}>
       {entry.universityName}
       <button type="button" onClick={() => toggleEdit({isTrue: true, id: id})}>Edit</button>
-      <button type="button">Delete</button>
+      <button type="button" onClick={() => handleDelete(id)}>Delete</button>
     </li>
   )
 }

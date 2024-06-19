@@ -1,0 +1,46 @@
+main {
+  flex: 1;
+  display: grid;
+  grid-template-rows: repeat(3, min-content);
+  grid-template-columns: minmax(400px, 1fr) 2fr;
+  grid-template-areas: 
+  "general display"
+  "education display"
+  "work display" ;
+}
+
+.form-container {
+  display: flex;
+  height: min-content;
+  flex-direction: column;
+  border: 2px solid black;
+  border-radius: 1rem;
+  margin: 1rem 1rem 0rem 1rem;
+}
+
+.form-container > * {
+  padding: 0.75rem;
+}
+
+.form-container h2 {
+  padding: 1.5rem 0.75rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+
+}
+
+.generalInfo {
+  grid-area: general;
+}
+
+.education {
+  grid-area: education;
+}
+
+button {
+  width: min-content;  
+}
+
+.buttons > * {
+  margin-right: 0.5rem;
+}
