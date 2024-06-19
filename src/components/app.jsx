@@ -57,6 +57,11 @@ function App() {
     setData({...data, education: educationList});
   }
 
+  const addEducation = (universityName, degree, start, end) => {
+    const education = [...data.education, {universityName, degree, start, end}];
+    setData({...data, education});
+  }
+
   const toggleActive = (key) => {
     const newActive = !activeList.includes(key) ? [...activeList, key] : activeList.filter(item => item !== key);
     setActiveList(newActive);
@@ -66,7 +71,7 @@ function App() {
   return (
     <>
       <GeneralInfo id={0} {...data} isActive={activeList.includes(0)} handleClick={() => toggleActive(0)} handleChange={handleChange} reset={reset}/>
-      <Education isEditing={isEditing} toggleEdit={setIsEditing} id={1} isActive={activeList.includes(1)} handleClick={() => toggleActive(1)} reset={reset} educationData={data.education} handleEdit={handleEducationEdit} />
+      <Education isEditing={isEditing} toggleEdit={setIsEditing} id={1} isActive={activeList.includes(1)} handleClick={() => toggleActive(1)} reset={reset} educationData={data.education} handleEdit={handleEducationEdit} handleAdd={addEducation} />
       {/* <Work id={2}/>
       <Display /> */}
     </>
@@ -90,8 +95,13 @@ function GeneralInfo({ id, isActive, handleClick, fullName, email, phone, locati
   )
 }
 
-function Education({id, isActive, handleClick, reset, educationData, handleEdit, isEditing, toggleEdit}) {
+function Education({id, isActive, handleClick, reset, educationData, handleEdit, isEditing, toggleEdit, handleAdd}) {
   let currentEdit;
+  const [add, setAdd] = useState({isAdd: false, universityName: "", degree: "", start: "", end: ""});
+  const handleChange = (id, val) => {
+    const newAdd = {...add, [id]: val};
+    setAdd(newAdd);
+  }
   if (isEditing.isTrue) {
     educationData.forEach(entry => {
       if (entry.id === isEditing.id) {
@@ -99,6 +109,12 @@ function Education({id, isActive, handleClick, reset, educationData, handleEdit,
       }
     });
   }
+
+  const addEducation = () => {
+    handleAdd(add.universityName, add.degree, add.start, add.end);
+    setAdd({isAdd: false, universityName: "", degree: "", start: "", end: ""})
+  }
+
   return (
     <>
       <div className="education" onClick={handleClick}>Education</div>
@@ -111,14 +127,23 @@ function Education({id, isActive, handleClick, reset, educationData, handleEdit,
         <button type="button" onClick={() => toggleEdit({isTrue: false, id: null})}>Done</button>
       </>
       }
-      {!isEditing.isTrue && isActive && 
+      {isActive && add.isAdd && 
+      <>
+        <FormInput label="University" id={"universityName"} text={add.universityName} handleChange={handleChange}/>
+        <FormInput label="Degree" id={"degree"} text={add.degree} handleChange={handleChange}/>
+        <FormInput label="Start" id={"start"} text={add.start} handleChange={handleChange}/>
+        <FormInput label="End" id={"end"} text={add.end} handleChange={handleChange}/>
+        <button type="button" onClick={() => addEducation()}>Add!</button>
+      </>
+      }
+      {!isEditing.isTrue && isActive && !add.isAdd &&
       <>
         {educationData.length !== 0 &&
         <ul>
           {educationData.map((entry) => <EducationList key={entry.id} id={entry.id} entry={entry} handleEdit={handleEdit} toggleEdit={toggleEdit}/>)}
         </ul>
         }
-        <button type="button">Add</button>
+        <button type="button" onClick={() => setAdd({...add, isAdd: true})}>Add</button>
         <button type="button" onClick={() => reset(id)}>Reset</button>
       </>
       }
@@ -147,7 +172,7 @@ function FormInput({ label, id, type = 'text', text, handleChange }) {
 
 function EducationList({entry, id, toggleEdit}) {
   return (
-    <li className="educationList">
+    <li className="educationList" key={id}>
       {entry.universityName}
       <button type="button" onClick={() => toggleEdit({isTrue: true, id: id})}>Edit</button>
       <button type="button">Delete</button>
