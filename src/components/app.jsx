@@ -58,7 +58,7 @@ function App() {
   }
 
   const addEducation = (universityName, degree, start, end) => {
-    const education = [...data.education, {universityName, degree, start, end}];
+    const education = [...data.education, {universityName, degree, start, end, id: uuidv4()}];
     setData({...data, education});
   }
 
